@@ -1,14 +1,23 @@
 import React from 'react';
 import { getPlayersData, PlayersDataObserver } from '../services/getPlayersData';
 import { Players, Player } from "../interfaces/players";
+import { type } from 'os';
 
 interface PlayerInfoState {
     playersInfo: Player []
     randomPlayers: Player []
-    players_set: Set<Player[]>
+    players_set: string []
+    count: number
+    isMaxFppgPlayer: boolean | undefined
+    showFppg: boolean
 }
 
 interface PlayerInfoProps {
+}
+
+export type Result = {
+    id: string,
+    isMaxFppg: boolean
 }
 
 // PlayerListProps, PlayerListState
@@ -20,7 +29,10 @@ constructor(props: PlayerInfoProps, state: PlayerInfoState) {
     this.state = {
         playersInfo: [] as Player[],
         randomPlayers: [] as Player[],
-        players_set: new Set()
+        players_set: [],
+        count: 0,
+        isMaxFppgPlayer: undefined,
+        showFppg: false
     }
 
 }
@@ -30,7 +42,6 @@ constructor(props: PlayerInfoProps, state: PlayerInfoState) {
     }
 
     showPlayersData = (results: Player []) => {
-        console.log('in component', results)
        if (this.state.playersInfo) {
         this.setState({
             playersInfo: results
@@ -47,21 +58,26 @@ constructor(props: PlayerInfoProps, state: PlayerInfoState) {
 
     selectRandomPlayers = () => {
         let selectedPlayers: Player[] = [];
-        let sortedPlayers: Player [] = [];
+        let sortedPlayers: string [] = [];
+        let playerIds: string [] = [];
+        let validPlayers: Set<string> = new Set();
+        let playerKey: string
         const COUNT = 2;
         for (let i = 0; i < COUNT; i++) {
             selectedPlayers = this.getRandomValues(selectedPlayers);
         }
         console.log('selectedPlayers', selectedPlayers);
-        sortedPlayers = selectedPlayers.sort((player1, player2) => player1.id > player2.id ? 1 : -1)
+        playerIds = selectedPlayers.map((selected) => selected.id);
+        playerKey = playerIds.sort((id1, id2) => id1 > id2 ? 1 : -1).join('');
 
-        if (this.state.players_set.has(sortedPlayers)) {
+        if (this.state.players_set.indexOf(playerKey) !== -1) {
             this.selectRandomPlayers();
         } else {
-            this.state.players_set.add(sortedPlayers);
+           this.state.players_set.push(playerKey);
         }
         
         this.setState({
+            showFppg: false,
             randomPlayers: selectedPlayers
         })
 
@@ -70,7 +86,7 @@ constructor(props: PlayerInfoProps, state: PlayerInfoState) {
 
     getRandomValues = (player: Player[]) => {
         let value: Player = this.state.playersInfo[Math.floor(Math.random() * this.state.playersInfo.length)];  
-        if (player.indexOf(value) == -1){
+        if (player.indexOf(value) === -1) {
             player.push(value);
         }
         else{
@@ -80,42 +96,57 @@ constructor(props: PlayerInfoProps, state: PlayerInfoState) {
         return player;
 }
 
+clickHandler = (player_id: string): void => {
+let resultArray: (Player | undefined) []
+    this.setState({
+        showFppg:true
+    })
+let maxFppg: number = Math.max(this.state.randomPlayers[0].fppg, this.state.randomPlayers[1].fppg)
+resultArray = this.state.randomPlayers
+                        .filter((pl) => pl.id === player_id).map((pl) => pl.fppg === maxFppg ? pl : undefined )
+                        
+console.log('resultArray', resultArray)
+
+        if (resultArray.length > 0) {
+            console.log(resultArray, 'true');
+            this.setState({
+                count: this.state.count + 1,
+                isMaxFppgPlayer: true
+            })
+        } else {
+            console.log(resultArray, 'false');
+            this.setState({
+                isMaxFppgPlayer: false
+            })
+        }
+}
+
 
     displayPlayers = () => {
         if (this.state.randomPlayers.length > 0) {
             return(
                 <>
                 <div>
-                    <div>
-                        {this.state.randomPlayers[0].first_name} {this.state.randomPlayers[0].last_name}
-                    </div>
-                    <div>
-                        <img 
-                            src={this.state.randomPlayers[0].images.default.url}
-                            height ={this.state.randomPlayers[0].images.default.height} 
-                            width ={this.state.randomPlayers[0].images.default.width}
-                        />
-                    </div>
-                    <div>
-                        {this.state.randomPlayers[0].position}
-                        {this.state.randomPlayers[0].fppg}
-                    </div>
-                </div>
-                <div>
-                    <div>
-                        {this.state.randomPlayers[1].first_name} {this.state.randomPlayers[1].last_name}
-                    </div>
-                    <div>
-                        <img 
-                            src={this.state.randomPlayers[1].images.default.url}
-                            height ={this.state.randomPlayers[1].images.default.height} 
-                            width ={this.state.randomPlayers[1].images.default.width}
-                        />
-                    </div>
-                    <div>
-                        {this.state.randomPlayers[1].position}
-                        {this.state.randomPlayers[1].fppg}
-                    </div>
+                    {
+                    this.state.randomPlayers.map((player: Player) => {
+                        return(
+                            <div key={player.id} onClick={() => this.clickHandler(player.id)}>
+                            <h4>{player.first_name} {player.last_name} </h4>
+                            <div>
+                            <img 
+                                src={player.images.default.url}
+                                height ={player.images.default.height} 
+                                width ={player.images.default.width}
+                                alt={'NBA player'}
+                            />
+                            </div>
+                            {this.state.showFppg ?
+                            <h4> {player.fppg} </h4> : null}
+                            </div>
+                        )}
+                    )}
+                    <button onClick={this.selectRandomPlayers}>next</button>
+                    <p> {this.state.showFppg ? this.state.count : 'click next'} </p>
                 </div>
                 </>
             );
