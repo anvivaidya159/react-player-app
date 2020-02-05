@@ -2,6 +2,7 @@ import React from 'react';
 import { getPlayersData, PlayersDataObserver } from '../services/getPlayersData';
 import { Players, Player } from "../interfaces/players";
 import { type } from 'os';
+import { PlayerDetails } from './PlayerDetails';
 
 interface PlayerInfoState {
     playersInfo: Player []
@@ -17,7 +18,8 @@ interface PlayerInfoProps {
 
 export type Result = {
     id: string,
-    isMaxFppg: boolean
+    fppg: number,
+    isWinner: boolean
 }
 
 // PlayerListProps, PlayerListState
@@ -25,6 +27,7 @@ export default class PlayerList extends React.Component<PlayerInfoProps,PlayerIn
 
 constructor(props: PlayerInfoProps, state: PlayerInfoState) {
     super(props);
+    this.clickHandler = this.clickHandler.bind(this);
     
     this.state = {
         playersInfo: [] as Player[],
@@ -97,24 +100,22 @@ constructor(props: PlayerInfoProps, state: PlayerInfoState) {
 }
 
 clickHandler = (player_id: string): void => {
-let resultArray: (Player | undefined) []
+let result: Player []
     this.setState({
         showFppg:true
     })
-let maxFppg: number = Math.max(this.state.randomPlayers[0].fppg, this.state.randomPlayers[1].fppg)
-resultArray = this.state.randomPlayers
-                        .filter((pl) => pl.id === player_id).map((pl) => pl.fppg === maxFppg ? pl : undefined )
-                        
-console.log('resultArray', resultArray)
 
-        if (resultArray.length > 0) {
-            console.log(resultArray, 'true');
+let maxFppg: number = Math.max(this.state.randomPlayers[0].fppg, this.state.randomPlayers[1].fppg)
+result = this.state.randomPlayers.filter((pl) => pl.id === player_id)
+                        
+console.log('result', result)
+
+        if (result[0].fppg === maxFppg) {
             this.setState({
                 count: this.state.count + 1,
                 isMaxFppgPlayer: true
             })
         } else {
-            console.log(resultArray, 'false');
             this.setState({
                 isMaxFppgPlayer: false
             })
@@ -130,19 +131,13 @@ console.log('resultArray', resultArray)
                     {
                     this.state.randomPlayers.map((player: Player) => {
                         return(
-                            <div key={player.id} onClick={() => this.clickHandler(player.id)}>
-                            <h4>{player.first_name} {player.last_name} </h4>
-                            <div>
-                            <img 
-                                src={player.images.default.url}
-                                height ={player.images.default.height} 
-                                width ={player.images.default.width}
-                                alt={'NBA player'}
-                            />
-                            </div>
-                            {this.state.showFppg ?
-                            <h4> {player.fppg} </h4> : null}
-                            </div>
+                           <PlayerDetails 
+                            player={player} 
+                            showFppg={this.state.showFppg} 
+                            onSelection={this.clickHandler} 
+                            >
+
+                           </PlayerDetails>
                         )}
                     )}
                     <button onClick={this.selectRandomPlayers}>next</button>
