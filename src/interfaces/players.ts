@@ -13,7 +13,3 @@ export interface Player {
         }
     }
 }
-
-export interface Players {
-    players: Player[]
-}

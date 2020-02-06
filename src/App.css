@@ -13,6 +13,42 @@
   color: white;
 } */
 
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 25px;
+  justify-content: center;
+}
+
+.item {
+  margin-right: 10px;
+}
+
+.border-red {
+  border: 1px solid red;
+}
+
+.border-green {
+  border: 1px solid green;
+}
+
+.border-black {
+  border: 1px solid black;
+}
+
 .App-link {
   color: #61dafb;
+}
+
+.btn {
+  height: 30px;
+  width: 100px;
+  margin-top: 30px;
+  font-weight: bold;
+}
+
+.msg {
+  font-weight: bold;
+  margin-top: 20px;
 }

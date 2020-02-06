@@ -1,28 +1,36 @@
 import React from "react";
-import { Player } from "../interfaces/players";
+import {Player} from "../interfaces/players";
 
 interface PlayerDetailsProps {
+    children: never[],
     player: Player,
-    showFppg: boolean
-    onSelection: (id: string) => void | undefined
+    showFppg: boolean,
+    onSelection: (id: string) => void,
+    isWinner: string | undefined,
+    isLooser: string | undefined 
 }
 
 export const PlayerDetails = (props: PlayerDetailsProps) => {
 
-const clickHandler = () => props.onSelection(props.player.id);
+    const green = (props.isWinner === props.player.id || ( props.isWinner === 'UNKNOWN' && props.isLooser !== props.player.id)) ? 'border-green' : ''
+    const red = (props.isLooser === props.player.id  || (props.isLooser === 'UNKNOWN' && props.isWinner !== props.player.id)) ? 'border-red' : ''
+    const black = (props.isWinner === undefined) ? 'border-black' : '' 
 
-return (
-    <div key={props.player.id} onClick={() => clickHandler()}>
-    <h4>{props.player.first_name} {props.player.last_name} </h4>
-    <div>
-    <img 
-        src={props.player.images.default.url}
-        height ={props.player.images.default.height} 
-        width ={props.player.images.default.width}
-        alt={'NBA player'}
-    />
-    </div>
-    {props.showFppg ? <h4> {props.player.fppg} </h4> : null}
-    </div>
-)
+    return (
+        <div key={props.player.id}
+             className={'item'}
+             onClick={() => props.onSelection(props.player.id)}
+        >
+            <h4>{props.player.first_name} {props.player.last_name} </h4>
+            <div className={`${green} ${red} ${black}`} >
+                <img
+                    src={props.player.images.default.url}
+                    height={props.player.images.default.height}
+                    width={props.player.images.default.width}
+                    alt={'NBA player'}
+                />
+            </div>
+            <h4> {props.showFppg ? props.player.fppg : null}</h4>
+        </div>
+    )
 }
