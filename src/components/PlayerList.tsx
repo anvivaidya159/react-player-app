@@ -47,7 +47,6 @@ export default class PlayerList extends React.Component<PlayerInfoProps, PlayerI
     }
 
     showError = () => {
-        console.log("error");
         return (
             <div>Page Not Found</div>
         );
@@ -68,7 +67,7 @@ export default class PlayerList extends React.Component<PlayerInfoProps, PlayerI
         for (let i = 0; i < COUNT; i++) {
             selectedPlayers = this.getRandomValues(selectedPlayers);
         }
-        console.log('selectedPlayers', selectedPlayers);
+
         playerIds = selectedPlayers.map((selected) => selected.id);
         playerKey = playerIds.sort((id1, id2) => id1 > id2 ? 1 : -1).join('');
 
@@ -136,7 +135,7 @@ export default class PlayerList extends React.Component<PlayerInfoProps, PlayerI
 
     showConfirmation = () => {
         return (
-            <h3> Congratulations! You have Successfully Completed the Quiz!!! </h3>
+            <p className={'msg'}> Congratulations! You have Successfully Completed the Quiz!!! </p>
         )
     }
 
@@ -145,7 +144,6 @@ export default class PlayerList extends React.Component<PlayerInfoProps, PlayerI
             return (
                 <>
                     <div className={'container'}>
-                    {this.state.count === 10 ? this.showConfirmation() : null}
                         {
                             this.state.randomPlayers.map((player: Player) => {
                                     return (
@@ -162,10 +160,13 @@ export default class PlayerList extends React.Component<PlayerInfoProps, PlayerI
                                 }
                             )}
                     </div>
-                    <button className={'btn'} onClick={this.selectRandomPlayers}> 
-                        {this.state.count === 10 ? 'Play Again' :'Next'}
-                    </button>
                     <p className={'msg'}> {this.state.showFppg ? this.message(this.state.count) : null} </p>
+                    {
+                        this.state.count !== 10 ?
+                            <button className={'btn'} onClick={this.selectRandomPlayers}> Next </button>
+                            :
+                            this.showConfirmation()
+                    }
                 </>
             );
         } else {
